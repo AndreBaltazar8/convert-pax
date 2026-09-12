@@ -1,0 +1,59 @@
+{
+  "name": "convert-pax",
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "author": "Andr\u00e9 Baltazar",
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AndreBaltazar8/convert-pax.git"
+  },
+  "description": "Lossless progressive PAX v0 converter with a strict whole-file 5 percent size cap",
+  "bin": {
+    "convert-pax": "bin/convert-pax.mjs"
+  },
+  "exports": {
+    ".": "./scripts/convert.mjs",
+    "./extensions": "./scripts/extensions.mjs",
+    "./gltf": "./scripts/gltf.mjs",
+    "./input": "./scripts/input.mjs",
+    "./texture-codec": "./scripts/texture-codec.mjs",
+    "./basis": "./scripts/basis.mjs"
+  },
+  "scripts": {
+    "convert": "node scripts/convert.mjs",
+    "fixtures": "node scripts/compatibility-assets.mjs",
+    "assets": "node scripts/assets.mjs",
+    "assets:optimized": "node scripts/optimized-assets.mjs",
+    "test": "node --test tests/format.test.mjs tests/gltf-support.test.mjs tests/remaining-extensions.test.mjs",
+    "test:full": "node --test tests/*.test.mjs",
+    "build:interactivity": "node scripts/build-interactivity.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.0",
+    "meshoptimizer": "1.2.0",
+    "ktx-parse": "2.0.0",
+    "draco3dgltf": "1.5.7",
+    "sharp": "0.35.4",
+    "gl-matrix": "3.4.4"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "4.5.0",
+    "@gltf-transform/extensions": "4.5.0",
+    "@gltf-transform/functions": "4.5.0",
+    "esbuild": "0.28.2"
+  },
+  "files": [
+    "bin",
+    "scripts",
+    "src",
+    "vendor",
+    "SPECIFICATION.md",
+    "docs",
+    "LICENSE",
+    "README.md"
+  ]
+}

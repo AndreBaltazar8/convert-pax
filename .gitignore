@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.cache/
+artifacts/
+test-results/
+playwright-report/
+public/decoders/
+public/assets/*
+!public/assets/README.md
+!public/assets/TestMorph.glb
+!public/assets/TestCompatibility.glb
+!public/assets/TestBasis.glb
+*.log

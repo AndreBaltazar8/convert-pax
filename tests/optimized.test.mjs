@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {readAsset} from '../scripts/input.mjs';import {accessor} from '../scripts/gltf.mjs';import {decodeGeometryCompression} from '../scripts/extensions.mjs';
+test('optimized meshopt baseline does not quantize the source helmet geometry',async()=>{
+ try{await fs.access('public/assets/FlightHelmetOptimized.glb');}catch{throw new Error('Run node scripts/optimized-assets.mjs first');}
+ const a=await readAsset('public/assets/FlightHelmet.glb'),b=await readAsset('public/assets/FlightHelmetOptimized.glb');await decodeGeometryCompression(b);
+ a.json.meshes.forEach((mesh,m)=>mesh.primitives.forEach((p,i)=>{const q=b.json.meshes[m].primitives[i];for(const [name,id]of Object.entries(p.attributes))assert.deepEqual(accessor(a.json,a.bin,id),accessor(b.json,b.bin,q.attributes[name]));const left=accessor(a.json,a.bin,p.indices),right=accessor(b.json,b.bin,q.indices);assert.equal(left.length,right.length);for(let t=0;t<left.length;t+=3){const x=Array.from(left.subarray(t,t+3)),y=Array.from(right.subarray(t,t+3));assert.ok([0,1,2].some(k=>x.every((v,j)=>v===y[(j+k)%3])),`oriented source triangle ${t/3}`);};}));
+});
