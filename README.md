@@ -1,65 +1,69 @@
 # convert-pax
 
-Convert glTF 2.0 or GLB assets to **PAX numeric version 0**, with reusable progressive
-geometry, lossless texture tiles, and original compressed KTX2 mip streaming.
-The complete output must be at most **105% of the input size**. Conversion rejects
-an unfit asset instead of silently exceeding the budget.
+Convert glTF 2.0 and GLB to **PAX v0** with progressive geometry and textures.
+The complete output is limited to **105% of the input size**; conversion fails
+if the asset cannot fit.
+
+## Usage
+
+Requires **Node.js 24+**. Supports local glTF files with external resources and GLB.
 
 ```sh
 npm ci
-node bin/convert-pax.mjs input.glb output.pax
-# Or after installing this package:
-convert-pax input.gltf output.pax --initial-quality sharp --texture-base-size 128
+node bin/convert-pax.mjs input.glb output.pax --initial-quality sharp
 ```
 
-Node.js 24 or newer is required. Local/external-resource glTF and GLB are supported.
-The converter writes the `.pax` and a `.stats.json` file containing sizes, stage
-counts, selected codecs, quality estimates and reconstruction hashes.
+Writes `.pax` and `.stats.json`. The report includes sizes, stages, codecs,
+quality estimates and reconstruction hashes.
 
 ```js
 import {convert} from 'convert-pax';
+
 await convert('input.glb', 'output.pax', {
+  initialQuality: 'balanced', // fast | balanced | sharp
   textureBaseSize: 128,
   geometryBaseRatio: 0.015,
-  initialQuality: 'balanced', // fast | balanced | sharp
-  geometryCodec: 'auto',     // auto | gzip (plain comparison)
+  geometryCodec: 'auto',     // auto | gzip
   adaptive: true,
   textureTiles: true,
   tileSize: 256,             // 128 | 256 | 512
 });
 ```
 
-CLI equivalents: `--texture-base-size`, `--geometry-base-ratio`,
-`--initial-quality`, `--geometry-codec`, `--tile-size`, `--no-adaptive`, and
-`--no-texture-tiles`. Settings affect startup/detail scheduling, not final tuples.
-A small asset or aggressive preview setting can fail the strict whole-file cap.
+CLI options: `--initial-quality`, `--texture-base-size`, `--geometry-base-ratio`,
+`--geometry-codec`, `--tile-size`, `--no-adaptive`, `--no-texture-tiles`.
 
-Geometry block codecs compete by encoded size. Adaptive stages account for
-position, normal, UV and vertex-color error. Texture importance and sampled error
-control preview quality. Exact original-image fallback is used where progressive
-image packaging would exceed the budget. Source compression is decoded before
-geometry encoding; no new float quantization is applied.
+## Quality and compatibility
 
-[Specification](https://github.com/AndreBaltazar8/spec-pax) ·
-[Three.js loader and samples](https://github.com/AndreBaltazar8/three-pax) ·
-[glTF/extension matrix and custom adapter API](docs/COMPATIBILITY.md) ·
-[Third-party notices](THIRD_PARTY.md)
+Settings control previews and refinement stages. Codecs are selected by size;
+adaptive stages consider geometry and texture error. Original images are retained
+when progressive encoding would exceed the budget. KTX2 can stream original mip
+levels. Small assets or large previews can exceed the cap and fail conversion.
+
+Final fidelity covers decoded geometry, topology, animation and scene semantics,
+and exact RGBA8 pixels or original compressed textures. Source geometry compression
+is decoded without adding float quantization. This is not a byte-identical GLB
+round trip; previews are approximate.
+
+See the [compatibility and adapter API](docs/COMPATIBILITY.md) and
+[format specification](https://github.com/AndreBaltazar8/spec-pax) for support limits.
 
 ## Verification
 
 ```sh
-npm test                 # generated core/extension and binary/codec tests
-npm run fixtures         # includes KTX2 fixture; one pinned CC0 texture download
-npm run assets           # optional heavy original assets; see licenses below
-npm run assets:optimized # optional meshopt + KTX2 helmet baseline
-npm run test:full         # exact full-source reconstruction, options and mip tests
+npm test                 # core, extension and codec tests
+npm run fixtures         # downloads one pinned CC0 texture for KTX2 tests
+npm run assets           # downloads heavy test assets
+npm run assets:optimized # meshopt + KTX2 helmet baseline
+npm run test:full         # reconstruction, settings and mip tests
 ```
 
-Heavy asset downloads include CC0 FlightHelmet/BoomBox and BrainStem under the
-source's Poser EULA. They are not included in this repository; acquisition saves
-provenance and licensing. Generated fixtures are MIT except their explicitly
-identified CC0 source textures. Browser rendering tests live in `three-pax`.
+Browser tests are in [three-pax](https://github.com/AndreBaltazar8/three-pax).
+[blender-pax](https://github.com/AndreBaltazar8/blender-pax) provides Blender import/export.
 
-Final fidelity means decoded source tuples/topology, animation and scene semantics,
-and exact RGBA8 samples or original compressed texture data. It is not a bytewise
-GLB round trip. See the specification for unsupported profiles and renderer limits.
+## License
+
+[MIT](LICENSE). Generated fixtures are MIT except identified CC0 textures.
+Optional downloads include CC0 FlightHelmet/BoomBox and BrainStem under its source
+Poser EULA; download scripts save provenance and licensing. See
+[third-party notices](THIRD_PARTY.md).
